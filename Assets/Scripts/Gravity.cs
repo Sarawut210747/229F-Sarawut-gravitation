@@ -1,16 +1,34 @@
+using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Gravity : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+    Rigidbody rb;
+    const float G = 0.0066743f;
+    public static List<Gravity> gravityObjectList;
+    void Awake(){
+        rb = GetComponent<Rigidbody>();
+        if(gravityObjectList == null){
+            gravityObjectList = new List<Gravity>();
+        } 
+        gravityObjectList.Add(this);
         
     }
-
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        
+        foreach(var obj in gravityObjectList){
+            if(obj != this)
+            Attract(obj);
+        }
+    }
+    void Attract(Gravity other){
+        Rigidbody OtherRb = other.rb;
+        Vector3 direction = rb.position - OtherRb.position;
+        float distance = direction.magnitude;
+        float foceMagnitude = G * (rb.mass * OtherRb.mass / Mathf.Pow(distance, 2));
+        Vector3 gavityFore = foceMagnitude * direction.normalized;
+
+        OtherRb.AddForce(gavityFore);
     }
 }
